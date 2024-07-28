@@ -1,9 +1,9 @@
 require('dotenv').config();
 const inquirer = require('inquirer');
-const pool = require('./db/connection');
+const pool = require('./db/connection.sql');
 
 function userOptions() {
-    inquirer.createPromptModule([
+    inquirer.prompt([
         {
             type: 'list',
             name: 'listItem',
@@ -133,9 +133,47 @@ async function addEmployee() {
     })
 };
 
-function addRole() {
-
-}
+async function addRole() {
+    const { rows } = await pool.query('SELECT * FROM department;')
+    const departmentOptions = rows.map(({ id, name }) => ({
+        name: name,
+        value: id
+    })) 
+    inquirer
+    .prompt([
+      {
+          type: 'input',
+          message: 'Please enter the name of the new role.',
+          name: 'name'
+      },
+      {
+        type: 'input',
+        message: 'Please enter the salary of the new role.',
+        name: 'salary'
+      },
+      {
+        type: 'list',
+        message: 'Please enter which department will this role fall under.',
+        choices: departmentOptions,
+        name: 'department'
+      }
+    ])
+    .then((answer) => {
+        console.log(answer);
+        if (!answer.name || !answer.salary || !answer.department) {
+            console.error("Please fill out every field.");
+            return;
+        }
+        const query = 'INSERT INTO role(title, salary, department_id) VALUES ($1, $2, $3)'
+        pool.query(query, [answer.name, answer.salary, answer.department], (error, result) => {
+            if(error){
+                console.error(error)
+            } else {
+                console.log(result)
+            }
+        })
+    })
+};
 
 function addDepartment() {
    inquirer.prompt([
@@ -161,8 +199,6 @@ function addDepartment() {
         })
     }
    }) 
-}
-
-
+};
 
 userOptions();
