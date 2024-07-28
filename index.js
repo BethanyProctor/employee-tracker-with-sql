@@ -133,9 +133,35 @@ async function addEmployee() {
     })
 };
 
+function addRole() {
 
+}
 
-
+function addDepartment() {
+   inquirer.prompt([
+    {
+        type: 'input',
+        message: 'Please enter the name of the new department.',
+        name: 'newDepartnemtName'
+    }
+   ])
+   .then((answer) => {
+    if (!answer.newDepartmentName) {
+        console.error('Please enter the department name.');
+        return;
+    }
+    const sql = 'INSERT INTO department (name) VALUES($1)'
+    {
+        pool.query(sql, (error, result) => {
+            if(error){
+                console.error(error)
+            } else {
+                console.log(result)
+            }
+        })
+    }
+   }) 
+}
 
 
 
